@@ -1,0 +1,13 @@
+{
+  "name": "microblog-backend",
+  "version": "1.0.0",
+  "description": "Biblioteca de acesso ao MongoDB para um sistema de micro-blogging",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "mongodb": "^6.0.0"
+  }
+}
