@@ -4,10 +4,16 @@
   "description": "Biblioteca de acesso ao MongoDB para um sistema de micro-blogging",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/server.js",
+    "cli": "node src/index.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.0.0",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mongodb": "^6.0.0"
   }
 }

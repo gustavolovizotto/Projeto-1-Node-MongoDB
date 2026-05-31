@@ -1,4 +1,5 @@
 const { ObjectId } = require('mongodb');
+const bcrypt = require('bcryptjs');
 const { conectar } = require('../db/connection');
 const { registrarErro } = require('../utils/logger');
 
@@ -24,11 +25,13 @@ class Usuario {
                 throw new Error('Já existe um usuário com esse username ou email.');
             }
 
+            const senhaHash = await bcrypt.hash(dados.senha, 10);
+
             const usuario = {
                 nome: dados.nome.trim(),
                 username: dados.username.trim().toLowerCase(),
                 email: dados.email.trim().toLowerCase(),
-                senha: dados.senha,
+                senha: senhaHash,
                 bio: dados.bio ? dados.bio.trim() : '',
                 dataCadastro: new Date()
             };
@@ -40,6 +43,27 @@ class Usuario {
             registrarErro('Usuario.inserir', erro);
             throw erro;
         }
+    }
+
+    static async buscarPorEmail(email) {
+        try {
+            if (!email || email.trim() === '') {
+                throw new Error('O email não pode ser vazio.');
+            }
+
+            const db = await conectar();
+            return await db.collection(COLECAO).findOne({
+                email: email.trim().toLowerCase()
+            });
+
+        } catch (erro) {
+            registrarErro('Usuario.buscarPorEmail', erro);
+            throw erro;
+        }
+    }
+
+    static async verificarSenha(senhaTexto, senhaHash) {
+        return bcrypt.compare(senhaTexto, senhaHash);
     }
 
     static async buscarPorUsername(username) {

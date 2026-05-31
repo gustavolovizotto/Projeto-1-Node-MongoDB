@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@<%= perfil.username %> — MicroBlog</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="navbar">
+        <a href="/" class="logo">MicroBlog</a>
+        <nav>
+            <a href="/perfil/<%= usuario.username %>">@<%= usuario.username %></a>
+            <a href="/logout" class="btn-sair">Sair</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <a href="/" class="btn-voltar">← Voltar ao feed</a>
+
+        <section class="card-perfil">
+            <h2><%= perfil.nome %></h2>
+            <p class="username-grande">@<%= perfil.username %></p>
+            <% if (perfil.bio) { %>
+                <p class="bio"><%= perfil.bio %></p>
+            <% } %>
+            <p class="data-cadastro">Membro desde <%= new Date(perfil.dataCadastro).toLocaleDateString('pt-BR') %></p>
+            <p class="contador-posts"><strong><%= posts.length %></strong> post(s)</p>
+        </section>
+
+        <section class="lista-posts">
+            <h3>Posts de @<%= perfil.username %></h3>
+
+            <% if (posts.length === 0) { %>
+                <p class="vazio">Este usuário ainda não publicou nada.</p>
+            <% } else { %>
+                <% posts.forEach(post => { %>
+                    <article class="card-post">
+                        <div class="post-cabecalho">
+                            <span class="data"><%= new Date(post.dataCriacao).toLocaleString('pt-BR') %></span>
+                        </div>
+
+                        <p class="post-conteudo"><%= post.conteudo %></p>
+
+                        <% if (post.hashtags && post.hashtags.length > 0) { %>
+                            <div class="hashtags">
+                                <% post.hashtags.forEach(h => { %>
+                                    <span class="hashtag"><%= h %></span>
+                                <% }) %>
+                            </div>
+                        <% } %>
+
+                        <div class="post-acoes">
+                            <a href="/posts/<%= post._id %>" class="btn-link">Comentários</a>
+                            <% if (String(post.autorId) === usuario.userId) { %>
+                                <form method="POST" action="/posts/<%= post._id %>/deletar" class="form-inline">
+                                    <button type="submit" class="btn-perigo"
+                                        onclick="return confirm('Deletar este post?')">Deletar</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </article>
+                <% }) %>
+            <% } %>
+        </section>
+    </main>
+</body>
+</html>

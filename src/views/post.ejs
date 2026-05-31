@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post — MicroBlog</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="navbar">
+        <a href="/" class="logo">MicroBlog</a>
+        <nav>
+            <a href="/perfil/<%= usuario.username %>">@<%= usuario.username %></a>
+            <a href="/logout" class="btn-sair">Sair</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <a href="/" class="btn-voltar">← Voltar ao feed</a>
+
+        <% if (erro) { %>
+            <p class="mensagem-erro"><%= erro %></p>
+        <% } %>
+
+        <article class="card-post destaque">
+            <div class="post-cabecalho">
+                <a href="/perfil/<%= post.autor.username %>" class="autor-link">
+                    <strong><%= post.autor.nome %></strong>
+                    <span class="username">@<%= post.autor.username %></span>
+                </a>
+                <span class="data"><%= new Date(post.dataCriacao).toLocaleString('pt-BR') %></span>
+            </div>
+
+            <p class="post-conteudo"><%= post.conteudo %></p>
+
+            <% if (post.hashtags && post.hashtags.length > 0) { %>
+                <div class="hashtags">
+                    <% post.hashtags.forEach(h => { %>
+                        <span class="hashtag"><%= h %></span>
+                    <% }) %>
+                </div>
+            <% } %>
+
+            <% if (String(post.autorId) === usuario.userId) { %>
+                <div class="post-acoes">
+                    <form method="POST" action="/posts/<%= post._id %>/deletar" class="form-inline">
+                        <button type="submit" class="btn-perigo"
+                            onclick="return confirm('Deletar este post e todos os comentários?')">Deletar post</button>
+                    </form>
+                </div>
+            <% } %>
+        </article>
+
+        <section class="secao-comentarios">
+            <h3>Comentários (<%= comentarios.length %>)</h3>
+
+            <form method="POST" action="/posts/<%= post._id %>/comentarios" class="form-comentario">
+                <div class="campo">
+                    <textarea name="conteudo" rows="2" required
+                        placeholder="Escreva um comentário..."></textarea>
+                </div>
+                <button type="submit" class="btn-primario">Comentar</button>
+            </form>
+
+            <% if (comentarios.length === 0) { %>
+                <p class="vazio">Nenhum comentário ainda.</p>
+            <% } else { %>
+                <% comentarios.forEach(c => { %>
+                    <div class="card-comentario">
+                        <div class="comentario-cabecalho">
+                            <a href="/perfil/<%= c.autor.username %>" class="autor-link">
+                                <strong><%= c.autor.nome %></strong>
+                                <span class="username">@<%= c.autor.username %></span>
+                            </a>
+                            <span class="data"><%= new Date(c.dataCriacao).toLocaleString('pt-BR') %></span>
+                        </div>
+
+                        <p><%= c.conteudo %></p>
+
+                        <% if (String(c.autorId) === usuario.userId) { %>
+                            <form method="POST" action="/comentarios/<%= c._id %>/deletar" class="form-inline">
+                                <input type="hidden" name="postId" value="<%= post._id %>">
+                                <button type="submit" class="btn-perigo-sm"
+                                    onclick="return confirm('Deletar este comentário?')">Deletar</button>
+                            </form>
+                        <% } %>
+                    </div>
+                <% }) %>
+            <% } %>
+        </section>
+    </main>
+</body>
+</html>

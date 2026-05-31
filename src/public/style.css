@@ -1,0 +1,400 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f0f2f5;
+    color: #1a1a1a;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+a {
+    color: #1d9bf0;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ---- NAVBAR ---- */
+.navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e1e8ed;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.navbar nav {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+/* ---- LOGO ---- */
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1d9bf0;
+}
+
+/* ---- CONTAINER ---- */
+.container {
+    max-width: 600px;
+    margin: 24px auto;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ---- PÁGINA DE AUTH ---- */
+.pagina-auth {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.card-auth {
+    background: #ffffff;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.card-auth h1.logo {
+    text-align: center;
+    font-size: 28px;
+}
+
+.card-auth h2 {
+    text-align: center;
+    font-size: 18px;
+    font-weight: normal;
+    color: #555;
+}
+
+/* ---- FORMULÁRIOS ---- */
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.campo label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+}
+
+.campo input,
+.campo textarea {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    width: 100%;
+    transition: border-color 0.2s;
+}
+
+.campo input:focus,
+.campo textarea:focus {
+    outline: none;
+    border-color: #1d9bf0;
+}
+
+.campo textarea {
+    resize: vertical;
+}
+
+.obrigatorio {
+    color: #e0245e;
+}
+
+.opcional {
+    color: #888;
+    font-weight: normal;
+    font-size: 12px;
+}
+
+/* ---- BOTÕES ---- */
+.btn-primario {
+    background-color: #1d9bf0;
+    color: #ffffff;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s;
+}
+
+.btn-primario:hover {
+    background-color: #1a8cd8;
+}
+
+.btn-perigo {
+    background: none;
+    border: 1px solid #e0245e;
+    color: #e0245e;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-perigo:hover {
+    background-color: #fce8ef;
+}
+
+.btn-perigo-sm {
+    background: none;
+    border: none;
+    color: #e0245e;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 2px 0;
+    text-decoration: underline;
+}
+
+.btn-link {
+    font-size: 13px;
+    color: #1d9bf0;
+}
+
+.btn-sair {
+    font-size: 13px;
+    color: #e0245e;
+}
+
+.btn-sair:hover {
+    text-decoration: underline;
+}
+
+.btn-voltar {
+    font-size: 13px;
+    color: #555;
+    display: inline-block;
+}
+
+.form-inline {
+    display: inline;
+}
+
+/* ---- CARDS ---- */
+.card-post {
+    background: #ffffff;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card-post.destaque {
+    border-color: #1d9bf0;
+    border-width: 2px;
+}
+
+.card-novo-post {
+    background: #ffffff;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card-novo-post h2 {
+    font-size: 15px;
+    color: #555;
+    font-weight: normal;
+}
+
+/* ---- CABEÇALHO DE POST ---- */
+.post-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.autor-link {
+    display: flex;
+    flex-direction: column;
+    color: inherit;
+    text-decoration: none;
+}
+
+.autor-link:hover strong {
+    text-decoration: underline;
+}
+
+.username {
+    font-size: 13px;
+    color: #888;
+}
+
+.data {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.post-conteudo {
+    font-size: 15px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ---- HASHTAGS ---- */
+.hashtags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.hashtag {
+    background-color: #e8f5fe;
+    color: #1d9bf0;
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 12px;
+}
+
+/* ---- AÇÕES DO POST ---- */
+.post-acoes {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ---- LISTA DE POSTS ---- */
+.lista-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ---- COMENTÁRIOS ---- */
+.secao-comentarios {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.secao-comentarios h3 {
+    font-size: 16px;
+    color: #333;
+}
+
+.form-comentario {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card-comentario {
+    background: #f7f9fa;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.comentario-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+/* ---- PERFIL ---- */
+.card-perfil {
+    background: #ffffff;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.username-grande {
+    color: #888;
+    font-size: 15px;
+}
+
+.bio {
+    color: #333;
+    font-size: 15px;
+    margin-top: 4px;
+}
+
+.data-cadastro {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.contador-posts {
+    font-size: 14px;
+    color: #555;
+}
+
+/* ---- MENSAGENS ---- */
+.mensagem-erro {
+    background-color: #fce8ef;
+    border: 1px solid #e0245e;
+    color: #c01c50;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+}
+
+.mensagem-sucesso {
+    background-color: #e6f4ea;
+    border: 1px solid #34a853;
+    color: #1e7e34;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+}
+
+.vazio {
+    color: #aaa;
+    text-align: center;
+    padding: 24px 0;
+    font-size: 14px;
+}
+
+/* ---- LINK ALTERNATIVO (auth) ---- */
+.link-alternativo {
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+}

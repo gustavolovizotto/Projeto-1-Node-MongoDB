@@ -1,27 +1,51 @@
-# Micro-blogging — Projeto 1
+# Micro-blogging — Projeto 2
 **EC48B-C71 - Programação Web Back-End**
 
-Biblioteca de acesso ao MongoDB para um sistema de micro-blogging (estilo Twitter), desenvolvida com Node.js e o driver nativo do MongoDB.
+Aplicação web de micro-blogging (estilo Twitter) desenvolvida com Node.js, Express.js e MongoDB. Permite cadastro, login com autenticação JWT, publicação de posts com hashtags e comentários.
+
+---
+
+## Tecnologias utilizadas
+
+| Tecnologia | Finalidade |
+|---|---|
+| Node.js | Ambiente de execução |
+| Express.js | Framework web (rotas, middleware) |
+| MongoDB | Banco de dados (driver nativo) |
+| JSON Web Token (JWT) | Autenticação via cookie HTTP |
+| bcryptjs | Hash de senhas |
+| EJS | Templates HTML gerados no servidor |
 
 ---
 
 ## Estrutura do projeto
 
 ```
-microblog/
-├── src/
-│   ├── db/
-│   │   └── connection.js     # Conexão com o MongoDB
-│   ├── models/
-│   │   ├── Usuario.js        # Coleção: usuarios
-│   │   ├── Post.js           # Coleção: posts
-│   │   └── Comentario.js     # Coleção: comentarios
-│   ├── utils/
-│   │   └── logger.js         # Log de erros em arquivo
-│   └── index.js              # Menu interativo (ponto de entrada)
-├── logs/                     # Arquivos de log gerados automaticamente
-├── .env.example
-└── package.json
+src/
+├── server.js                 # Ponto de entrada do servidor Express
+├── index.js                  # Menu interativo CLI (Projeto 1 — mantido)
+├── db/
+│   └── connection.js         # Conexão com o MongoDB
+├── middleware/
+│   └── autenticar.js         # Middleware de verificação do JWT
+├── models/
+│   ├── Usuario.js            # Coleção: usuarios
+│   ├── Post.js               # Coleção: posts
+│   └── Comentario.js         # Coleção: comentarios
+├── routes/
+│   ├── auth.js               # Rotas de login, cadastro e logout
+│   ├── posts.js              # Rotas do feed e posts
+│   └── comentarios.js        # Rotas de comentários
+├── views/
+│   ├── login.ejs             # Tela de login
+│   ├── cadastro.ejs          # Tela de cadastro
+│   ├── feed.ejs              # Feed principal
+│   ├── post.ejs              # Post individual com comentários
+│   └── perfil.ejs            # Perfil do usuário
+├── public/
+│   └── style.css             # Estilos da interface
+└── utils/
+    └── logger.js             # Log de erros em arquivo
 ```
 
 ---
@@ -29,63 +53,80 @@ microblog/
 ## Pré-requisitos
 
 - [Node.js](https://nodejs.org/) v18 ou superior
-- [MongoDB Community Server](https://www.mongodb.com/try/download/community) rodando localmente na porta `27017`
+- MongoDB rodando na porta `27017`
+
+A forma mais simples de rodar o MongoDB é via Docker:
+```bash
+docker run -d --name mongodb -p 27017:27017 mongo:7
+```
+
+Nas próximas vezes, basta iniciar o container já existente:
+```bash
+docker start mongodb
+```
 
 ---
 
 ## Como rodar
 
-**1. Clone ou extraia o projeto e entre na pasta:**
-```bash
-cd microblog
-```
-
-**2. Instale as dependências:**
+**1. Instale as dependências:**
 ```bash
 npm install
 ```
 
-**3. Configure o arquivo de ambiente:**
+**2. Configure o arquivo de ambiente:**
 
-Renomeie o arquivo `.env.example` para `.env`. O conteúdo padrão já funciona para instalação local:
+Copie o `.env.example` para `.env`:
+```bash
+cp .env.example .env
+```
+
+Conteúdo do `.env`:
 ```
 MONGO_URI=mongodb://localhost:27017
 DB_NAME=microblog
+JWT_SECRET=troque_por_uma_chave_secreta_forte
+PORT=3000
 ```
 
-**4. Certifique-se de que o MongoDB está rodando:**
+**3. Certifique-se de que o MongoDB está rodando** (veja a seção Pré-requisitos).
 
-No PowerShell como Administrador:
-```bash
-net start MongoDB
-```
-
-**5. Inicie o sistema:**
+**4. Inicie o servidor:**
 ```bash
 npm start
 ```
 
+**5. Acesse no navegador:**
+```
+http://localhost:3000
+```
+
 ---
 
-## Menu interativo
+## Rotas da aplicação
 
-Ao rodar, um menu é exibido no terminal com as seguintes opções:
+| Método | Rota | Autenticação | Descrição |
+|---|---|---|---|
+| GET | `/login` | Não | Exibe formulário de login |
+| POST | `/login` | Não | Autentica e gera o cookie JWT |
+| GET | `/cadastro` | Não | Exibe formulário de cadastro |
+| POST | `/cadastro` | Não | Cria conta e já faz login |
+| GET | `/logout` | Não | Remove o cookie e encerra a sessão |
+| GET | `/` | **Sim** | Feed com todos os posts |
+| POST | `/posts` | **Sim** | Publica novo post |
+| POST | `/posts/:id/deletar` | **Sim** | Deleta um post próprio |
+| GET | `/posts/:id` | **Sim** | Exibe post e seus comentários |
+| POST | `/posts/:id/comentarios` | **Sim** | Adiciona comentário ao post |
+| POST | `/comentarios/:id/deletar` | **Sim** | Deleta um comentário próprio |
+| GET | `/perfil/:username` | **Sim** | Exibe perfil e posts do usuário |
 
-| Opção | Ação |
-|-------|------|
-| 1 | Cadastrar usuário |
-| 2 | Buscar usuário por username |
-| 3 | Listar todos os usuários |
-| 4 | Deletar usuário |
-| 5 | Publicar post |
-| 6 | Buscar posts por hashtag |
-| 7 | Buscar posts por usuário |
-| 8 | Listar todos os posts |
-| 9 | Deletar post |
-| 10 | Comentar em um post |
-| 11 | Buscar comentários de um post |
-| 12 | Deletar comentário |
-| 0 | Sair |
+---
+
+## Autenticação
+
+O login gera um **JWT** assinado com a chave `JWT_SECRET` e o armazena em um cookie `httpOnly` com validade de 24 horas. O cookie é enviado automaticamente pelo navegador em todas as requisições.
+
+O middleware `autenticar.js` verifica o token em todas as rotas protegidas. Se o token for inválido ou ausente, o usuário é redirecionado para `/login`.
 
 ---
 
@@ -93,17 +134,17 @@ Ao rodar, um menu é exibido no terminal com as seguintes opções:
 
 ### `usuarios`
 | Campo | Tipo | Obrigatório |
-|-------|------|-------------|
+|---|---|---|
 | nome | String | Sim |
 | username | String | Sim (único) |
 | email | String | Sim (único) |
-| senha | String | Sim |
+| senha | String (bcrypt hash) | Sim |
 | bio | String | Não |
 | dataCadastro | Date | Automático |
 
 ### `posts`
 | Campo | Tipo | Obrigatório |
-|-------|------|-------------|
+|---|---|---|
 | conteudo | String (máx. 280 chars) | Sim |
 | autorId | ObjectId | Sim |
 | hashtags | Array | Automático |
@@ -112,7 +153,7 @@ Ao rodar, um menu é exibido no terminal com as seguintes opções:
 
 ### `comentarios`
 | Campo | Tipo | Obrigatório |
-|-------|------|-------------|
+|---|---|---|
 | conteudo | String | Sim |
 | autorId | ObjectId | Sim |
 | postId | ObjectId | Sim |
@@ -120,28 +161,11 @@ Ao rodar, um menu é exibido no terminal com as seguintes opções:
 
 ---
 
-## Visualizando os dados
+## CLI (Projeto 1)
 
-### MongoDB Compass (interface gráfica)
-
-A forma mais fácil de visualizar os dados é usando o [MongoDB Compass](https://www.mongodb.com/products/compass), a interface gráfica oficial e gratuita do MongoDB.
-
-1. Baixe e instale o Compass
-2. Abra o Compass e conecte usando a string:
-```
-mongodb://localhost:27017
-```
-3. Navegue até o banco `microblog` e explore as coleções `usuarios`, `posts` e `comentarios`
-
-### mongosh (terminal)
-
-Também é possível visualizar os dados direto pelo terminal:
+O menu interativo do Projeto 1 foi mantido e pode ser acessado com:
 ```bash
-mongosh
-use microblog
-db.usuarios.find()
-db.posts.find()
-db.comentarios.find()
+npm run cli
 ```
 
 ---
@@ -153,4 +177,4 @@ Todos os erros capturados são registrados automaticamente na pasta `/logs`, em 
 logs/erros-2024-04-28.log
 ```
 
-Cada entrada de log contém o timestamp, a origem do erro, a mensagem e o stack trace.
+Cada entrada contém timestamp, origem do erro, mensagem e stack trace.

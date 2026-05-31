@@ -1,0 +1,92 @@
+const express = require('express');
+const { ObjectId } = require('mongodb');
+const Comentario = require('../models/Comentario');
+const Post = require('../models/Post');
+const Usuario = require('../models/Usuario');
+const autenticar = require('../middleware/autenticar');
+
+const router = express.Router();
+
+router.get('/posts/:id', autenticar, async (req, res) => {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        return res.redirect('/?erro=Post inválido.');
+    }
+
+    try {
+        const posts = await Post.listar();
+        const post = posts.find(p => String(p._id) === id);
+
+        if (!post) {
+            return res.redirect('/?erro=Post não encontrado.');
+        }
+
+        const autor = await Usuario.buscarPorId(String(post.autorId));
+        const comentarios = await Comentario.buscarPorPost(id);
+
+        const autoresIds = [...new Set(comentarios.map(c => String(c.autorId)))];
+        const autores = await Promise.all(autoresIds.map(aid => Usuario.buscarPorId(aid)));
+        const mapaAutores = {};
+        autores.forEach(u => { if (u) mapaAutores[String(u._id)] = u; });
+
+        const comentariosEnriquecidos = comentarios.map(c => ({
+            ...c,
+            autor: mapaAutores[String(c.autorId)] || { username: 'desconhecido', nome: 'Usuário removido' }
+        }));
+
+        res.render('post', {
+            usuario: req.usuario,
+            post: { ...post, autor: autor || { username: 'desconhecido', nome: 'Usuário removido' } },
+            comentarios: comentariosEnriquecidos,
+            erro: req.query.erro || null
+        });
+    } catch (erro) {
+        res.redirect('/?erro=Erro ao carregar o post.');
+    }
+});
+
+router.post('/posts/:id/comentarios', autenticar, async (req, res) => {
+    const { id } = req.params;
+    const { conteudo } = req.body;
+
+    if (!conteudo || conteudo.trim() === '') {
+        return res.redirect(`/posts/${id}?erro=O comentário não pode ser vazio.`);
+    }
+
+    if (!ObjectId.isValid(id)) {
+        return res.redirect('/?erro=Post inválido.');
+    }
+
+    try {
+        await Comentario.inserir({ conteudo, autorId: req.usuario.userId, postId: id });
+        res.redirect(`/posts/${id}`);
+    } catch (erro) {
+        res.redirect(`/posts/${id}?erro=${encodeURIComponent(erro.message)}`);
+    }
+});
+
+router.post('/comentarios/:id/deletar', autenticar, async (req, res) => {
+    const { id } = req.params;
+    const voltarPara = req.body.postId ? `/posts/${req.body.postId}` : '/';
+
+    if (!ObjectId.isValid(id)) {
+        return res.redirect(`${voltarPara}?erro=Comentário inválido.`);
+    }
+
+    try {
+        const comentariosDoUsuario = await Comentario.buscarPorAutor(req.usuario.userId);
+        const eDoUsuario = comentariosDoUsuario.some(c => String(c._id) === id);
+
+        if (!eDoUsuario) {
+            return res.redirect(`${voltarPara}?erro=Você só pode deletar seus próprios comentários.`);
+        }
+
+        await Comentario.deletar(id);
+        res.redirect(voltarPara);
+    } catch (erro) {
+        res.redirect(`${voltarPara}?erro=${encodeURIComponent(erro.message)}`);
+    }
+});
+
+module.exports = router;

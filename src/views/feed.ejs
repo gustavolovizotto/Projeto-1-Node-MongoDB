@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed — MicroBlog</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="navbar">
+        <span class="logo">MicroBlog</span>
+        <nav>
+            <a href="/perfil/<%= usuario.username %>">@<%= usuario.username %></a>
+            <a href="/logout" class="btn-sair">Sair</a>
+        </nav>
+    </header>
+
+    <main class="container">
+
+        <% if (erro) { %>
+            <p class="mensagem-erro"><%= erro %></p>
+        <% } %>
+        <% if (sucesso) { %>
+            <p class="mensagem-sucesso"><%= sucesso %></p>
+        <% } %>
+
+        <section class="card-novo-post">
+            <h2>Novo post</h2>
+            <form method="POST" action="/posts">
+                <div class="campo">
+                    <textarea name="conteudo" maxlength="280" rows="3" required
+                        placeholder="O que está acontecendo? (máx. 280 caracteres, use #hashtags)"></textarea>
+                </div>
+                <button type="submit" class="btn-primario">Publicar</button>
+            </form>
+        </section>
+
+        <section class="lista-posts">
+            <% if (posts.length === 0) { %>
+                <p class="vazio">Nenhum post ainda. Seja o primeiro a publicar!</p>
+            <% } else { %>
+                <% posts.forEach(post => { %>
+                    <article class="card-post">
+                        <div class="post-cabecalho">
+                            <a href="/perfil/<%= post.autor.username %>" class="autor-link">
+                                <strong><%= post.autor.nome %></strong>
+                                <span class="username">@<%= post.autor.username %></span>
+                            </a>
+                            <span class="data"><%= new Date(post.dataCriacao).toLocaleString('pt-BR') %></span>
+                        </div>
+
+                        <p class="post-conteudo"><%= post.conteudo %></p>
+
+                        <% if (post.hashtags && post.hashtags.length > 0) { %>
+                            <div class="hashtags">
+                                <% post.hashtags.forEach(h => { %>
+                                    <span class="hashtag"><%= h %></span>
+                                <% }) %>
+                            </div>
+                        <% } %>
+
+                        <div class="post-acoes">
+                            <a href="/posts/<%= post._id %>" class="btn-link">Comentários</a>
+                            <% if (String(post.autorId) === usuario.userId) { %>
+                                <form method="POST" action="/posts/<%= post._id %>/deletar" class="form-inline">
+                                    <button type="submit" class="btn-perigo"
+                                        onclick="return confirm('Deletar este post?')">Deletar</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </article>
+                <% }) %>
+            <% } %>
+        </section>
+    </main>
+</body>
+</html>
