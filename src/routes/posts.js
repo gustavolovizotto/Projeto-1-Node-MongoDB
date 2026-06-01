@@ -55,17 +55,84 @@ router.post('/posts/:id/deletar', autenticar, async (req, res) => {
     }
 
     try {
-        const posts = await Post.buscarPorAutor(req.usuario.userId);
-        const eDoUsuario = posts.some(p => String(p._id) === id);
+        const post = await Post.buscarPorId(id);
+
+        if (!post) {
+            return res.redirect('/?erro=Post não encontrado.');
+        }
+
+        const eDoUsuario = String(post.autorId) === req.usuario.userId;
 
         if (!eDoUsuario) {
             return res.redirect('/?erro=Você só pode deletar seus próprios posts.');
         }
 
         await Post.deletar(id);
-        res.redirect('/');
+        res.redirect('/?sucesso=Post deletado com sucesso.');
     } catch (erro) {
         res.redirect(`/?erro=${encodeURIComponent(erro.message)}`);
+    }
+});
+
+router.get('/posts/:id/editar', autenticar, async (req, res) => {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        return res.redirect('/?erro=Post inválido.');
+    }
+
+    try {
+        const post = await Post.buscarPorId(id);
+
+        if (!post) {
+            return res.redirect('/?erro=Post não encontrado.');
+        }
+
+        const eDoUsuario = String(post.autorId) === req.usuario.userId;
+
+        if (!eDoUsuario) {
+            return res.redirect('/?erro=Você só pode editar seus próprios posts.');
+        }
+
+        res.render('editar-post', {
+            usuario: req.usuario,
+            post,
+            erro: req.query.erro || null
+        });
+    } catch (erro) {
+        res.redirect(`/?erro=${encodeURIComponent(erro.message)}`);
+    }
+});
+
+router.post('/posts/:id/editar', autenticar, async (req, res) => {
+    const { id } = req.params;
+    const { conteudo } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+        return res.redirect('/?erro=Post inválido.');
+    }
+
+    if (!conteudo || conteudo.trim() === '') {
+        return res.redirect(`/posts/${id}/editar?erro=O conteúdo do post não pode ser vazio.`);
+    }
+
+    try {
+        const post = await Post.buscarPorId(id);
+
+        if (!post) {
+            return res.redirect('/?erro=Post não encontrado.');
+        }
+
+        const eDoUsuario = String(post.autorId) === req.usuario.userId;
+
+        if (!eDoUsuario) {
+            return res.redirect('/?erro=Você só pode editar seus próprios posts.');
+        }
+
+        await Post.atualizar(id, conteudo);
+        res.redirect('/');
+    } catch (erro) {
+        res.redirect(`/posts/${id}/editar?erro=${encodeURIComponent(erro.message)}`);
     }
 });
 

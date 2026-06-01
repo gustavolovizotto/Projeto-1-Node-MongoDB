@@ -98,6 +98,11 @@ class Post {
             if (!ObjectId.isValid(id)) throw new Error(`ID inválido: "${id}"`);
 
             const db = await conectar();
+        
+            await db.collection('comentarios').deleteMany({
+                postId: new ObjectId(id)
+            });
+
             const resultado = await db.collection(COLECAO).deleteOne({
                 _id: new ObjectId(id)
             });
@@ -106,6 +111,46 @@ class Post {
 
         } catch (erro) {
             registrarErro('Post.deletar', erro);
+            throw erro;
+        }
+    }
+
+    static async atualizar(id, conteudo) {
+        try {
+            if (!id) throw new Error('O ID não pode ser vazio.');
+            if (!ObjectId.isValid(id)) throw new Error(`ID inválido: "${id}"`);
+            if (!conteudo || conteudo.trim() === '') {
+                throw new Error('O conteúdo não pode ser vazio.');
+            }
+            if (conteudo.trim().length > MAX_CARACTERES) {
+                throw new Error(`O conteúdo excede o limite de ${MAX_CARACTERES} caracteres.`);
+            }
+
+            const hashtags = (conteudo.match(/#\w+/g) || [])
+                .map(h => h.toLowerCase());
+
+            const db = await conectar();
+            const resultado = await db.collection(COLECAO).updateOne(
+                { _id: new ObjectId(id) },
+                { $set: { conteudo: conteudo.trim(), hashtags } }
+            );
+
+            return resultado.modifiedCount > 0;
+        } catch (erro) {
+            registrarErro('Post.atualizar', erro);
+            throw erro;
+        }
+    }
+
+    static async buscarPorId(id) {
+        try {
+            if (!id) throw new Error('O ID não pode ser vazio.');
+            if (!ObjectId.isValid(id)) throw new Error(`ID inválido: "${id}"`);
+
+            const db = await conectar();
+            return await db.collection(COLECAO).findOne({ _id: new ObjectId(id) });
+        } catch (erro) {
+            registrarErro('Post.buscarPorId', erro);
             throw erro;
         }
     }

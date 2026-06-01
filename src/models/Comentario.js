@@ -21,12 +21,23 @@ class Comentario {
             }
 
             const db = await conectar();
+            const hashtags = (dados.conteudo.match(/#\w+/g) || [])
+                .map(h => h.toLowerCase());
+
             const comentario = {
                 conteudo: dados.conteudo.trim(),
                 autorId: new ObjectId(dados.autorId),
                 postId: new ObjectId(dados.postId),
+                hashtags,
                 dataCriacao: new Date()
             };
+
+            if (dados.parentId) {
+                if (!ObjectId.isValid(dados.parentId)) {
+                    throw new Error(`parentId inválido: "${dados.parentId}"`);
+                }
+                comentario.parentId = new ObjectId(dados.parentId);
+            }
 
             const resultado = await db.collection(COLECAO).insertOne(comentario);
             return { _id: resultado.insertedId, ...comentario };
@@ -77,6 +88,11 @@ class Comentario {
             if (!ObjectId.isValid(id)) throw new Error(`ID inválido: "${id}"`);
 
             const db = await conectar();
+            
+            await db.collection(COLECAO).deleteMany({
+                parentId: new ObjectId(id)
+            });
+
             const resultado = await db.collection(COLECAO).deleteOne({
                 _id: new ObjectId(id)
             });
@@ -85,6 +101,43 @@ class Comentario {
 
         } catch (erro) {
             registrarErro('Comentario.deletar', erro);
+            throw erro;
+        }
+    }
+
+    static async buscarPorId(id) {
+        try {
+            if (!id) throw new Error('O ID não pode ser vazio.');
+            if (!ObjectId.isValid(id)) throw new Error(`ID inválido: "${id}"`);
+
+            const db = await conectar();
+            return await db.collection(COLECAO).findOne({ _id: new ObjectId(id) });
+        } catch (erro) {
+            registrarErro('Comentario.buscarPorId', erro);
+            throw erro;
+        }
+    }
+
+    static async atualizar(id, conteudo) {
+        try {
+            if (!id) throw new Error('O ID não pode ser vazio.');
+            if (!ObjectId.isValid(id)) throw new Error(`ID inválido: "${id}"`);
+            if (!conteudo || conteudo.trim() === '') {
+                throw new Error('O comentário não pode ser vazio.');
+            }
+
+            const hashtags = (conteudo.match(/#\w+/g) || [])
+                .map(h => h.toLowerCase());
+
+            const db = await conectar();
+            const resultado = await db.collection(COLECAO).updateOne(
+                { _id: new ObjectId(id) },
+                { $set: { conteudo: conteudo.trim(), hashtags } }
+            );
+
+            return resultado.modifiedCount > 0;
+        } catch (erro) {
+            registrarErro('Comentario.atualizar', erro);
             throw erro;
         }
     }
