@@ -1,10 +1,25 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
+const RefreshToken = require('../models/RefreshToken');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'segredo_dev';
-const COOKIE_OPTS = { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 };
+
+const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000; // 15 minutos
+const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 dias
+
+const COOKIE_ACCESS_OPTS = { 
+    httpOnly: true, 
+    maxAge: ACCESS_TOKEN_MAX_AGE,
+    sameSite: 'lax'
+};
+
+const COOKIE_REFRESH_OPTS = { 
+    httpOnly: true, 
+    maxAge: REFRESH_TOKEN_MAX_AGE,
+    sameSite: 'lax'
+};
 
 router.get('/login', (req, res) => {
     if (req.cookies.jwt) return res.redirect('/');
@@ -32,10 +47,13 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign(
             { userId: String(usuario._id), username: usuario.username, nome: usuario.nome },
             JWT_SECRET,
-            { expiresIn: '24h' }
+            { expiresIn: '15m' }
         );
 
-        res.cookie('jwt', token, COOKIE_OPTS);
+        const refreshTokenVal = await RefreshToken.criar(usuario._id);
+
+        res.cookie('jwt', token, COOKIE_ACCESS_OPTS);
+        res.cookie('refreshToken', refreshTokenVal, COOKIE_REFRESH_OPTS);
         res.redirect('/');
     } catch (erro) {
         res.render('login', { erro: 'Erro interno. Tente novamente.' });
@@ -60,18 +78,30 @@ router.post('/cadastro', async (req, res) => {
         const token = jwt.sign(
             { userId: String(usuario._id), username: usuario.username, nome: usuario.nome },
             JWT_SECRET,
-            { expiresIn: '24h' }
+            { expiresIn: '15m' }
         );
 
-        res.cookie('jwt', token, COOKIE_OPTS);
+        const refreshTokenVal = await RefreshToken.criar(usuario._id);
+
+        res.cookie('jwt', token, COOKIE_ACCESS_OPTS);
+        res.cookie('refreshToken', refreshTokenVal, COOKIE_REFRESH_OPTS);
         res.redirect('/');
     } catch (erro) {
         res.render('cadastro', { erro: erro.message });
     }
 });
 
-router.get('/logout', (req, res) => {
+router.get('/logout', async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (refreshToken) {
+            await RefreshToken.revogar(refreshToken);
+        }
+    } catch (erro) {
+        // ignora
+    }
     res.clearCookie('jwt');
+    res.clearCookie('refreshToken');
     res.redirect('/login');
 });
 
