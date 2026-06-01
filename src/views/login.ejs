@@ -5,11 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — MicroBlog</title>
     <link rel="stylesheet" href="/style.css">
+    <script>
+        (function () {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 <body class="pagina-auth">
     <div class="card-auth">
-        <h1 class="logo">MicroBlog</h1>
-        <h2>Entrar</h2>
+        <div class="auth-header-row">
+            <h1 class="logo">MicroBlog</h1>
+            <button class="theme-toggle-btn" id="themeToggle" title="Alternar Tema">
+                <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+            </button>
+        </div>
 
         <% if (erro) { %>
             <p class="mensagem-erro"><%= erro %></p>
@@ -29,5 +39,33 @@
 
         <p class="link-alternativo">Não tem conta? <a href="/cadastro">Cadastre-se</a></p>
     </div>
+
+    <script>
+        const toggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const sunSVG = `<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>`;
+        const moonSVG = `<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>`;
+
+        function updateThemeUI(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            if (theme === 'dark') {
+                themeIcon.innerHTML = sunSVG;
+            } else {
+                themeIcon.innerHTML = moonSVG;
+            }
+        }
+
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        updateThemeUI(currentTheme);
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                const activeTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                updateThemeUI(newTheme);
+            });
+        }
+    </script>
 </body>
 </html>

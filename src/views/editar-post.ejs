@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Post — MicroBlog</title>
+    <link rel="stylesheet" href="/style.css">
+    <script>
+        (function () {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+</head>
+<body>
+    <header class="navbar">
+        <a href="/" class="logo">MicroBlog</a>
+        <nav>
+            <button class="theme-toggle-btn" id="themeToggle" title="Alternar Tema">
+                <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+            </button>
+            <a href="/perfil/<%= usuario.username %>">@<%= usuario.username %></a>
+            <a href="/logout" class="btn-sair">Sair</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <% if (erro) { %>
+            <p class="mensagem-erro"><%= erro %></p>
+        <% } %>
+
+        <div class="card-auth" style="margin: 0 auto; max-width: 500px;">
+            <h2>Editar Post</h2>
+            <form method="POST" action="/posts/<%= post._id %>/editar" class="form-editar">
+                <div class="campo">
+                    <label for="conteudo">Conteúdo (máx. 280 caracteres, use #hashtags)</label>
+                    <textarea id="conteudo" name="conteudo" rows="5" required maxlength="280" placeholder="O que está acontecendo?"><%= post.conteudo %></textarea>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 10px;">
+                    <a href="/" class="btn-perigo" style="text-align: center; flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center;">Cancelar</a>
+                    <button type="submit" class="btn-primario" style="flex: 2;">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const toggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const sunSVG = `<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>`;
+        const moonSVG = `<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>`;
+
+        function updateThemeUI(theme) {
+            if (theme === 'dark') {
+                themeIcon.innerHTML = sunSVG;
+            } else {
+                themeIcon.innerHTML = moonSVG;
+            }
+        }
+
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        updateThemeUI(currentTheme);
+
+        toggleBtn.addEventListener('click', () => {
+            const nextTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', nextTheme);
+            localStorage.setItem('theme', nextTheme);
+            updateThemeUI(nextTheme);
+        });
+    </script>
+</body>
+</html>
