@@ -52,53 +52,32 @@ src/
 
 ## Pré-requisitos
 
-- [Node.js](https://nodejs.org/) v18 ou superior
-- MongoDB rodando na porta `27017`
-
-A forma mais simples de rodar o MongoDB é via Docker:
-```bash
-docker run -d --name mongodb -p 27017:27017 mongo:7
-```
-
-Nas próximas vezes, basta iniciar o container já existente:
-```bash
-docker start mongodb
-```
+- [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/)
 
 ---
 
 ## Como rodar
 
-**1. Instale as dependências:**
+**1. Clone o repositório e entre na pasta do projeto.**
+
+**2. Suba os containers (app + MongoDB):**
 ```bash
-npm install
+docker-compose up --build
 ```
 
-**2. Configure o arquivo de ambiente:**
-
-Copie o `.env.example` para `.env`:
-```bash
-cp .env.example .env
-```
-
-Conteúdo do `.env`:
-```
-MONGO_URI=mongodb://localhost:27017
-DB_NAME=microblog
-JWT_SECRET=troque_por_uma_chave_secreta_forte
-PORT=3000
-```
-
-**3. Certifique-se de que o MongoDB está rodando** (veja a seção Pré-requisitos).
-
-**4. Inicie o servidor:**
-```bash
-npm start
-```
-
-**5. Acesse no navegador:**
+**3. Acesse no navegador:**
 ```
 http://localhost:3000
+```
+
+> Na primeira execução o `--build` compila a imagem. Nas próximas vezes pode omiti-lo:
+> ```bash
+> docker-compose up
+> ```
+
+**Para parar os containers:**
+```bash
+docker-compose down
 ```
 
 ---
